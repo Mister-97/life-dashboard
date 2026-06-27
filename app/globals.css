@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #09091A;
+  color: #EEEEFF;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0F0E24; }
+::-webkit-scrollbar-thumb { background: #2A2650; border-radius: 2px; }
+
+input[type='month']::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.3); cursor: pointer; }
+select option { background: #0F0E24; color: #EEEEFF; }
+
+.sg { font-family: 'Space Grotesk', sans-serif; }
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.slide-up { animation: slide-up 0.3s ease-out forwards; }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fade-in { animation: fade-in 0.4s ease-out forwards; }
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(167,139,250,0.25); }
+  50%       { box-shadow: 0 0 24px rgba(167,139,250,0.5);  }
+}
+.glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
+
+@keyframes xp-fill {
+  from { width: 0%; }
+}
+.xp-bar { animation: xp-fill 1s ease-out forwards; }
+
+@keyframes badge-pop {
+  0%   { transform: scale(0.8); opacity: 0; }
+  70%  { transform: scale(1.1); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+.badge-pop { animation: badge-pop 0.4s ease-out forwards; }
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200%  center; }
+}
+.shimmer-text {
+  background: linear-gradient(90deg, #A78BFA, #22D3EE, #A78BFA);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0);   }
+  50%       { transform: translateY(-4px); }
+}
+.float { animation: float 4s ease-in-out infinite; }
+
+@keyframes streak-glow {
+  0%, 100% { text-shadow: 0 0 8px rgba(251,146,60,0.6); }
+  50%       { text-shadow: 0 0 20px rgba(251,146,60,1); }
+}
+.streak-text { animation: streak-glow 2s ease-in-out infinite; }
