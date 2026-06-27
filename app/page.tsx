@@ -86,6 +86,7 @@ const ACHIEVEMENTS: Achievement[] = [
   { id: 'thousand',     name: 'Four Figures',   desc: '$1,000+ in a single month',       Icon: BarChart3,    color: C.cyan,   xpReward: 200, check: (i) => Object.values(i.reduce((a,x) => ({ ...a, [x.date.slice(0,7)]: (a[x.date.slice(0,7)] || 0) + x.amount }), {} as Record<string,number>)).some(v => v >= 1000) },
   { id: 'double',       name: 'Double Down',    desc: 'Crush your doubling target',      Icon: Zap,          color: C.purple, xpReward: 250, check: (i) => Object.values(i.reduce((a,x) => ({ ...a, [x.date.slice(0,7)]: (a[x.date.slice(0,7)] || 0) + x.amount }), {} as Record<string,number>)).some(v => v >= 1440) },
   { id: 'two_k',        name: 'Big Moves',      desc: '$2,000+ in a single month',       Icon: Rocket,       color: C.pink,   xpReward: 300, check: (i) => Object.values(i.reduce((a,x) => ({ ...a, [x.date.slice(0,7)]: (a[x.date.slice(0,7)] || 0) + x.amount }), {} as Record<string,number>)).some(v => v >= 2000) },
+  { id: 'three_5k',     name: 'On A Roll',      desc: '$3,500+ in a single month',       Icon: TrendingUp,   color: C.blue,   xpReward: 400, check: (i) => Object.values(i.reduce((a,x) => ({ ...a, [x.date.slice(0,7)]: (a[x.date.slice(0,7)] || 0) + x.amount }), {} as Record<string,number>)).some(v => v >= 3500) },
   { id: 'five_tasks',   name: 'In The Zone',    desc: 'Complete 5+ tasks in one day',    Icon: Target,       color: C.orange, xpReward: 100, check: (i, t) => { const by = t.filter(x => x.done).reduce((a, x) => ({ ...a, [x.date]: (a[x.date] || 0) + 1 }), {} as Record<string,number>); return Object.values(by).some(v => v >= 5) } },
   { id: 'week_streak',  name: 'Week Warrior',   desc: '7+ day task streak',              Icon: Flame,        color: C.orange, xpReward: 200, check: (i, t, s) => s >= 7 },
   { id: 'music_money',  name: 'Artist Rising',  desc: 'Earn from your Music mission',    Icon: Music,        color: C.purple, xpReward: 150, check: (i) => i.some(x => x.missionId === 'music') },
@@ -323,6 +324,67 @@ function HBar({ label, value, max, from, to, sub }: { label: string; value: numb
   )
 }
 
+// ─── ACHIEVEMENTS CARD ────────────────────────────────────────────────────────
+function AchievementsCard({ income, tasks, streak, unlockedCount }: { income: Income[]; tasks: Task[]; streak: number; unlockedCount: number }) {
+  const [active, setActive] = useState<string | null>(null)
+  const activeAch = ACHIEVEMENTS.find(a => a.id === active)
+  const activeUnlocked = activeAch ? activeAch.check(income, tasks, streak) : false
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Trophy size={13} style={{ color: C.gold }} />
+          <SLabel>Achievements</SLabel>
+        </div>
+        <span className="text-[10px] font-semibold" style={{ color: C.muted }}>{unlockedCount}/{ACHIEVEMENTS.length}</span>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-3">
+        {ACHIEVEMENTS.map(a => {
+          const unlocked = a.check(income, tasks, streak)
+          const isActive = active === a.id
+          return (
+            <button
+              key={a.id}
+              onClick={() => setActive(isActive ? null : a.id)}
+              onMouseEnter={() => setActive(a.id)}
+              onMouseLeave={() => setActive(null)}
+              className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ${unlocked ? 'badge-pop' : ''}`}
+              style={{
+                background: isActive ? (unlocked ? `${a.color}35` : C.faint + '40') : unlocked ? `${a.color}20` : C.card2,
+                border: `1.5px solid ${isActive ? (a.color + '80') : unlocked ? a.color + '50' : C.faint + '30'}`,
+                opacity: unlocked ? 1 : 0.4,
+                transform: isActive ? 'scale(1.1)' : 'scale(1)',
+              }}
+            >
+              {unlocked ? <a.Icon size={16} style={{ color: a.color }} /> : <Lock size={12} style={{ color: C.faint }} />}
+            </button>
+          )
+        })}
+      </div>
+
+      {activeAch && (
+        <div className="rounded-xl p-3 slide-up" style={{ background: activeUnlocked ? `${activeAch.color}12` : C.card2, border: `1px solid ${activeUnlocked ? activeAch.color + '40' : C.border}` }}>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <activeAch.Icon size={14} style={{ color: activeUnlocked ? activeAch.color : C.faint }} />
+              <span className="text-sm font-bold" style={{ color: activeUnlocked ? activeAch.color : C.muted }}>{activeAch.name}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${C.gold}15`, color: C.gold }}>+{activeAch.xpReward} XP</span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: activeUnlocked ? `${activeAch.color}20` : C.faint + '20', color: activeUnlocked ? activeAch.color : C.faint }}>{activeUnlocked ? 'Unlocked' : 'Locked'}</span>
+            </div>
+          </div>
+          <p className="text-xs" style={{ color: C.muted }}>{activeAch.desc}</p>
+        </div>
+      )}
+
+      {!activeAch && <p className="text-[10px]" style={{ color: C.faint }}>Tap any badge to see details.</p>}
+    </Card>
+  )
+}
+
 // ─── HUB (Overview) ───────────────────────────────────────────────────────────
 function Hub({ income, tasks, expenses, streak }: { income: Income[]; tasks: Task[]; expenses: Expense[]; streak: number }) {
   const cm      = monthStr()
@@ -445,38 +507,8 @@ function Hub({ income, tasks, expenses, streak }: { income: Income[]; tasks: Tas
         </div>
       </Card>
 
-      {/* Achievements unlocked */}
-      {unlockedAch.length > 0 && (
-        <Card className="p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Trophy size={13} style={{ color: C.gold }} />
-              <SLabel>Achievements</SLabel>
-            </div>
-            <span className="text-[10px] font-semibold" style={{ color: C.muted }}>{unlockedAch.length}/{ACHIEVEMENTS.length}</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {ACHIEVEMENTS.map(a => {
-              const unlocked = a.check(income, tasks, streak)
-              return (
-                <div
-                  key={a.id}
-                  title={`${a.name}: ${a.desc}`}
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${unlocked ? 'badge-pop' : ''}`}
-                  style={{
-                    background: unlocked ? `${a.color}20` : C.card2,
-                    border: `1.5px solid ${unlocked ? a.color + '50' : C.faint + '30'}`,
-                    opacity: unlocked ? 1 : 0.35,
-                  }}
-                >
-                  {unlocked ? <a.Icon size={16} style={{ color: a.color }} /> : <Lock size={12} style={{ color: C.faint }} />}
-                </div>
-              )
-            })}
-          </div>
-          <p className="text-[10px] mt-3" style={{ color: C.faint }}>Hover achievements to see details</p>
-        </Card>
-      )}
+      {/* Achievements */}
+      <AchievementsCard income={income} tasks={tasks} streak={streak} unlockedCount={unlockedAch.length} />
 
       {/* Recent loot */}
       <Card className="p-5">
